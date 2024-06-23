@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">ShowList</string>
+
+    <string name="top_name">My List Categories</string>
+
+    <string name="list_name">My List</string>
+
+    <string name="posterDesc">A poster of the current show</string>
+
+    <string name="add_show">An add button</string>
+
+    <string-array name="options">
+        <item>TV Shows</item>
+        <item>Movies</item>
+    </string-array>
+</resources>
