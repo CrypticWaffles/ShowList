@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -21,10 +24,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +41,7 @@ public class ShowCategoryActivity extends AppCompatActivity {
     private final List<Show> allShows = new ArrayList<>();
     private final List<Show> displayedShows = new ArrayList<>();
     private ShowAdapter adapter;
+    private RecyclerView recyclerView;
     private TextView emptyState;
     private String currentSort = "default";
     private boolean favoritesOnly = false;
@@ -49,10 +55,11 @@ public class ShowCategoryActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        RecyclerView recyclerView = findViewById(R.id.recycler_shows);
+        recyclerView = findViewById(R.id.recycler_shows);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ShowAdapter(displayedShows);
         recyclerView.setAdapter(adapter);
+        attachSwipeToDelete();
 
         emptyState = findViewById(R.id.empty_state);
 
@@ -217,24 +224,93 @@ public class ShowCategoryActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Delete Show")
                 .setMessage("Delete \"" + show.getTitle() + "\"?")
-                .setPositiveButton("Delete", (dialog, which) -> deleteShow(show))
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    deleteShow(show);
+                    Toast.makeText(this, "\"" + show.getTitle() + "\" deleted", Toast.LENGTH_SHORT).show();
+                })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
+    // Raw delete with no feedback — callers are responsible for showing Toast or Snackbar
     private void deleteShow(Show show) {
         DatabaseHelper databaseHelper = new DatabaseHelper(this);
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         try {
             db.delete("SHOW", "_id = ?", new String[]{String.valueOf(show.getId())});
             allShows.remove(show);
-            Toast.makeText(this, "\"" + show.getTitle() + "\" deleted", Toast.LENGTH_SHORT).show();
             applyFiltersAndSort();
         } catch (SQLiteException e) {
             Toast.makeText(this, "Failed to delete show", Toast.LENGTH_SHORT).show();
         } finally {
             db.close();
         }
+    }
+
+    private void undoDelete(Show show) {
+        new Thread(() -> {
+            DatabaseHelper databaseHelper = new DatabaseHelper(this);
+            SQLiteDatabase db = databaseHelper.getWritableDatabase();
+            try {
+                ContentValues values = new ContentValues();
+                values.put("TITLE", show.getTitle());
+                values.put("RATING", show.getRatingValue());
+                values.put("DESCRIPTION", show.getDescription());
+                values.put("IMAGE_RESOURCE_ID", show.getImageResourceId());
+                values.put("IMAGE_URL", show.getImageUrl());
+                values.put("STATUS", show.getStatus());
+                values.put("FAVORITE", show.isFavorite() ? 1 : 0);
+                db.insert("SHOW", null, values);
+            } catch (SQLiteException e) {
+                runOnUiThread(() -> Toast.makeText(this, "Failed to restore show", Toast.LENGTH_SHORT).show());
+            } finally {
+                db.close();
+            }
+            runOnUiThread(() -> {
+                if (!isFinishing() && !isDestroyed()) fetchShowsFromDatabase();
+            });
+        }).start();
+    }
+
+    private void attachSwipeToDelete() {
+        Paint paint = new Paint();
+        paint.setColor(Color.parseColor("#C62828"));
+
+        ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(
+                0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+            @Override
+            public boolean onMove(RecyclerView rv, RecyclerView.ViewHolder vh, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                if (position == RecyclerView.NO_ID) return;
+                Show show = displayedShows.get(position);
+                deleteShow(show);
+                Snackbar.make(recyclerView, "\"" + show.getTitle() + "\" deleted", Snackbar.LENGTH_LONG)
+                        .setAction("Undo", v -> undoDelete(show))
+                        .show();
+            }
+
+            @Override
+            public void onChildDraw(Canvas c, RecyclerView rv, RecyclerView.ViewHolder vh,
+                                    float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    View item = vh.itemView;
+                    if (dX < 0) {
+                        c.drawRect(item.getRight() + dX, item.getTop(), item.getRight(), item.getBottom(), paint);
+                    } else {
+                        c.drawRect(item.getLeft(), item.getTop(), item.getLeft() + dX, item.getBottom(), paint);
+                    }
+                }
+                super.onChildDraw(c, rv, vh, dX, dY, actionState, isCurrentlyActive);
+            }
+        };
+
+        new ItemTouchHelper(callback).attachToRecyclerView(recyclerView);
     }
 
     private void updateFavoriteInDb(int showId, boolean favorite) {

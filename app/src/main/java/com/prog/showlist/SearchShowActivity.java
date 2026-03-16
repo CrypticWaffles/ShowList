@@ -2,6 +2,10 @@ package com.prog.showlist;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,12 +25,16 @@ import java.util.List;
 
 public class SearchShowActivity extends AppCompatActivity {
 
+    private static final int SEARCH_DELAY_MS = 400;
+
     private EditText searchInput;
     private ProgressBar progressBar;
     private TextView emptyState;
     private RecyclerView recyclerView;
     private SearchResultAdapter adapter;
     private final List<TvMazeShow> results = new ArrayList<>();
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable pendingSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,10 +72,30 @@ public class SearchShowActivity extends AppCompatActivity {
         searchInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH
                     || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                searchHandler.removeCallbacks(pendingSearch);
                 performSearch();
                 return true;
             }
             return false;
+        });
+
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                searchHandler.removeCallbacks(pendingSearch);
+                if (s.toString().trim().isEmpty()) {
+                    results.clear();
+                    adapter.notifyDataSetChanged();
+                    emptyState.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.GONE);
+                    return;
+                }
+                pendingSearch = () -> performSearch();
+                searchHandler.postDelayed(pendingSearch, SEARCH_DELAY_MS);
+            }
         });
     }
 

@@ -1,19 +1,22 @@
 package com.prog.showlist;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
-
-import com.bumptech.glide.Glide;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
+import com.bumptech.glide.Glide;
 
 public class ShowActivity extends AppCompatActivity {
     public static final String EXTRA_SHOWID = "showId";
@@ -26,12 +29,36 @@ public class ShowActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("");
         }
 
         showId = getIntent().getIntExtra(EXTRA_SHOWID, -1);
         loadShow();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_show, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        if (item.getItemId() == R.id.action_edit) {
+            Intent intent = new Intent(this, AddShowActivity.class);
+            intent.putExtra(AddShowActivity.EXTRA_SHOWID, showId);
+            startActivity(intent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void loadShow() {
@@ -53,6 +80,10 @@ public class ShowActivity extends AppCompatActivity {
                 String status = cursor.getString(4);
                 currentFavorite = cursor.getInt(5) == 1;
                 String imageUrl = cursor.getString(6);
+
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().setTitle(titleText);
+                }
 
                 ((TextView) findViewById(R.id.title)).setText(titleText);
                 ((TextView) findViewById(R.id.rating)).setText(ratingNum + "/10");
@@ -95,6 +126,13 @@ public class ShowActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reload in case the user edited and came back
+        loadShow();
+    }
+
     private void updateFavoriteView(TextView favoriteView) {
         favoriteView.setText(currentFavorite ? "★" : "☆");
         favoriteView.setTextColor(currentFavorite
@@ -114,14 +152,5 @@ public class ShowActivity extends AppCompatActivity {
         } finally {
             db.close();
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 }

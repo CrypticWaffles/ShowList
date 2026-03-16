@@ -1,47 +1,90 @@
 # ShowList
-ShowList is a simple Android application for creating and managing a personal list of TV shows. Built with Java, it uses a local SQLite database to store and manage show data, providing a basic, offline-first experience for tracking your favorite series.
+
+ShowList is an Android app for tracking TV shows. Search for shows directly from TVmaze, or add them manually. Track your watch status, rate shows, and mark favorites — all stored locally on your device with SQLite.
 
 ## Features
 
-*   **View Your Shows:** Displays a scrollable list of your saved TV shows, each with a title and rating.
-*   **Detailed View:** Tap any show in the list to navigate to a dedicated screen with a larger image and a full description.
-*   **Add New Shows:** Easily add new entries to your list using a floating action button that opens a form for the title, rating, and description.
-*   **Delete Shows:** Remove shows from the list by long-pressing an item and selecting the 'Delete' option from the context menu.
-*   **Local Storage:** All show data is stored locally on your device using an SQLite database, which is pre-populated with a few examples.
+- **TVmaze Search** — Search the TVmaze database by name. Results include posters, ratings, and descriptions that auto-fill the add form.
+- **Watch Status** — Tag each show as *Plan to Watch*, *Watching*, *Completed*, or *Dropped*, with color-coded labels throughout the app.
+- **Favorites** — Star any show from the list or detail view. Filter the list to favorites only with the toggle button.
+- **Search & Sort** — Filter your list in real time by title. Sort by default order, name (A–Z), rating (high to low), or status.
+- **Add / Edit / Delete** — Add shows manually or from TVmaze. Long-press any show to edit or delete it.
+- **Detail View** — Tap a show to see its full poster, rating, status, and description. Toggle favorite from this screen too.
+- **Local Storage** — All data is stored on-device with SQLite. No account or internet connection required to use existing shows.
+
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="screenshots/main_list.png" width="200"/><br/><sub>Main List</sub></td>
+    <td align="center"><img src="screenshots/detail_view.png" width="200"/><br/><sub>Detail View</sub></td>
+    <td align="center"><img src="screenshots/edit_show.png" width="200"/><br/><sub>Edit Show</sub></td>
+    <td align="center"><img src="screenshots/add_show.png" width="200"/><br/><sub>Add Show</sub></td>
+    <td align="center"><img src="screenshots/tvmaze_search.png" width="200"/><br/><sub>TVmaze Search</sub></td>
+  </tr>
+</table>
 
 ## Getting Started
 
-To get a local copy up and running, follow these simple steps.
-
 ### Prerequisites
 
-*   Android Studio
-*   An Android device or emulator
+- Android Studio
+- Android device or emulator (API 21+)
 
 ### Installation
 
-1.  Clone the repository:
-    ```sh
-    git clone https://github.com/crypticwaffles/showlist.git
-    ```
-2.  Open the project directory in Android Studio.
-3.  Allow Gradle to sync the project dependencies.
-4.  Build and run the application on your Android emulator or physical device.
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/crypticwaffles/showlist.git
+   ```
+2. Open the project in Android Studio.
+3. Let Gradle sync the dependencies.
+4. Build and run on an emulator or physical device.
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Language | Java |
+| Min SDK | 21 (Android 5.0) |
+| UI | Material Design 3, RecyclerView, AppCompatActivity |
+| Database | SQLite via `SQLiteOpenHelper` |
+| Networking | `HttpURLConnection` + `org.json` |
+| Image loading | Glide 4.x |
+| API | [TVmaze REST API](https://www.tvmaze.com/api) (free, no key required) |
 
 ## Project Structure
 
-The project follows a standard Android application structure. Key components are located in the `app/src/main/` directory.
+```
+app/src/main/
+├── java/com/prog/showlist/
+│   ├── ShowCategoryActivity.java   — Main list screen (search, sort, filter)
+│   ├── ShowActivity.java           — Detail view for a single show
+│   ├── AddShowActivity.java        — Add / edit form with TVmaze search button
+│   ├── SearchShowActivity.java     — TVmaze search screen with results list
+│   ├── DatabaseHelper.java         — SQLite schema, migrations, seed data
+│   ├── ShowAdapter.java            — RecyclerView adapter for the main list
+│   ├── SearchResultAdapter.java    — RecyclerView adapter for TVmaze results
+│   ├── Show.java                   — Data model for a saved show
+│   └── TvMazeApiClient.java        — TVmaze HTTP search client
+│   └── TvMazeShow.java             — Data model for a TVmaze search result
+└── res/
+    ├── layout/                     — XML layouts for all screens and list items
+    ├── drawable/                   — Icons and sample show images
+    └── values/                     — Strings, colors, and Material 3 theme
+```
 
-*   **`java/com/prog/showlist/`**: Contains the core Java source code.
-    *   `ShowCategoryActivity.java`: The main activity that serves as the entry point, displaying the list of all shows.
-    *   `ShowActivity.java`: The activity for displaying the detailed information of a single selected show.
-    *   `AddShowActivity.java`: The activity that provides the form for adding a new show to the database.
-    *   `DatabaseHelper.java`: Manages all SQLite database operations, including table creation, versioning, and data insertion/deletion.
-    *   `ShowAdapter.java`: A custom `ArrayAdapter` to populate the `ListView` in `ShowCategoryActivity` with show data.
-    *   `Show.java`: The data model (POJO) that represents a single TV show.
+## Database Schema
 
-*   **`res/`**: Contains all non-code resources.
-    *   `layout/`: XML files that define the user interface for each activity (`activity_show_category.xml`, `activity_show.xml`, etc.).
-    *   `drawable/`: Image assets and vector drawables used in the application.
-    *   `menu/`: Defines the context menu for delete operations.
-    *   `values/`: Resource files for strings, colors, and themes.
+The SQLite database (`showList`) contains a single `SHOW` table:
+
+| Column | Type | Notes |
+|---|---|---|
+| `_id` | INTEGER PK | Auto-increment |
+| `TITLE` | TEXT | |
+| `RATING` | REAL | 0.0 – 10.0 |
+| `DESCRIPTION` | TEXT | |
+| `IMAGE_RESOURCE_ID` | INTEGER | Drawable resource ID (pre-loaded shows) |
+| `IMAGE_URL` | TEXT | Remote poster URL (TVmaze shows) |
+| `STATUS` | TEXT | Plan to Watch / Watching / Completed / Dropped |
+| `FAVORITE` | INTEGER | 0 or 1 |
