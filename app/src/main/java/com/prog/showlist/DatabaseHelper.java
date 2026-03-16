@@ -2,12 +2,13 @@ package com.prog.showlist;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "showList";
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 4;
 
     DatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -32,6 +33,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.insert("SHOW", null, showValues);
     }
 
+    // The original app (DB_VERSION=1) ran updateMyDatabase(db, 0, 1) on first install.
+    // Because 0 < 2, the FAVORITE column was already added to every existing device.
+    // Checking before ALTER TABLE prevents a "duplicate column" crash during upgrade.
+    private boolean columnExists(SQLiteDatabase db, String table, String column) {
+        Cursor cursor = db.rawQuery("PRAGMA table_info(" + table + ")", null);
+        try {
+            int nameIndex = cursor.getColumnIndex("name");
+            while (cursor.moveToNext()) {
+                if (column.equalsIgnoreCase(cursor.getString(nameIndex))) {
+                    return true;
+                }
+            }
+        } finally {
+            cursor.close();
+        }
+        return false;
+    }
+
     private void updateMyDatabase(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 1) {
             db.execSQL("CREATE TABLE SHOW (_id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -46,7 +65,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (oldVersion < 2) {
-            db.execSQL("ALTER TABLE SHOW ADD COLUMN FAVORITE NUMERIC;");
+            if (!columnExists(db, "SHOW", "FAVORITE")) {
+                db.execSQL("ALTER TABLE SHOW ADD COLUMN FAVORITE INTEGER DEFAULT 0;");
+            }
+        }
+
+        if (oldVersion < 3) {
+            if (!columnExists(db, "SHOW", "STATUS")) {
+                db.execSQL("ALTER TABLE SHOW ADD COLUMN STATUS TEXT DEFAULT 'Plan to Watch';");
+            }
+        }
+
+        if (oldVersion < 4) {
+            if (!columnExists(db, "SHOW", "IMAGE_URL")) {
+                db.execSQL("ALTER TABLE SHOW ADD COLUMN IMAGE_URL TEXT;");
+            }
         }
     }
 }

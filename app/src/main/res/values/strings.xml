@@ -9,8 +9,10 @@
 
     <string name="add_show">An add button</string>
 
-    <string-array name="options">
-        <item>TV Shows</item>
-        <item>Movies</item>
+    <string-array name="sort_options">
+        <item>Default</item>
+        <item>Name (A–Z)</item>
+        <item>Rating (High to Low)</item>
+        <item>Status</item>
     </string-array>
 </resources>
