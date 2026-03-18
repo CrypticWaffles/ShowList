@@ -1,4 +1,4 @@
-package com.prog.showlist;
+package com.prog.queued;
 
 import android.view.LayoutInflater;
 import android.view.View;

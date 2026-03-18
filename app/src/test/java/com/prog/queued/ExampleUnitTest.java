@@ -1,4 +1,4 @@
-package com.prog.showlist;
+package com.prog.queued;
 
 import org.junit.Test;
 

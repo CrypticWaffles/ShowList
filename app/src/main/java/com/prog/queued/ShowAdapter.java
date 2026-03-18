@@ -1,4 +1,4 @@
-package com.prog.showlist;
+package com.prog.queued;
 
 import android.graphics.Color;
 import android.view.LayoutInflater;

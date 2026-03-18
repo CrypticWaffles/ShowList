@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ShowList"
+rootProject.name = "Queued"
 include(":app")
  

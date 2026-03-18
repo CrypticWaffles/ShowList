@@ -1,6 +1,6 @@
-# ShowList
+# Queued
 
-ShowList is an Android app for tracking TV shows. Search for shows directly from TVmaze, or add them manually. Track your watch status, rate shows, and mark favorites — all stored locally on your device with SQLite.
+Queued is an Android app for tracking TV shows. Search for shows directly from TVmaze, or add them manually. Track your watch status, rate shows, and mark favorites — all stored locally on your device with SQLite.
 
 ## Features
 
@@ -39,7 +39,7 @@ ShowList is an Android app for tracking TV shows. Search for shows directly from
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/crypticwaffles/showlist.git
+   git clone https://github.com/crypticwaffles/queued.git
    ```
 2. Open the project in Android Studio.
 3. Let Gradle sync the dependencies.
@@ -61,7 +61,7 @@ ShowList is an Android app for tracking TV shows. Search for shows directly from
 
 ```
 app/src/main/
-├── java/com/prog/showlist/
+├── java/com/prog/queued/
 │   ├── ShowCategoryActivity.java   — Main list screen (search, sort, filter)
 │   ├── ShowActivity.java           — Detail view for a single show
 │   ├── AddShowActivity.java        — Add / edit form with TVmaze search button
@@ -80,7 +80,7 @@ app/src/main/
 
 ## Database Schema
 
-The SQLite database (`showList`) contains a single `SHOW` table:
+The SQLite database (`queued`) contains a single `SHOW` table:
 
 | Column | Type | Notes |
 |---|---|---|

@@ -1,4 +1,4 @@
-package com.prog.showlist;
+package com.prog.queued;
 
 public class Show {
     private int id;

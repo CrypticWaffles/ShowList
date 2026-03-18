@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.prog.showlist"
+    namespace = "com.prog.queued"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.prog.showlist"
+        applicationId = "com.prog.queued"
         minSdk = 21
         targetSdk = 34
         versionCode = 1
