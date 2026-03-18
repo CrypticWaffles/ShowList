@@ -14,6 +14,10 @@ ShowList is an Android app for tracking TV shows. Search for shows directly from
 
 ## Screenshots
 
+<p align="center">
+  <img src="screenshots/AppDemo.png" width="700"/>
+</p>
+
 <table>
   <tr>
     <td align="center"><img src="screenshots/main_list.png" width="200"/><br/><sub>Main List</sub></td>
