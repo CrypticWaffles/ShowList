@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "showList";
-    private static final int DB_VERSION = 5;
+    private static final int DB_VERSION = 6;
 
     DatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -36,12 +36,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Used in v<5 block — STATUS, FAVORITE, and IMAGE_URL columns all exist by then
     private static void insertShowFull(SQLiteDatabase db, String title, double rating,
-                                       String description, String status, boolean favorite) {
+                                       String description, String status, boolean favorite,
+                                       String imageUrl) {
         ContentValues values = new ContentValues();
         values.put("TITLE", title);
         values.put("RATING", rating);
         values.put("DESCRIPTION", description);
         values.put("IMAGE_RESOURCE_ID", R.drawable.default_image);
+        values.put("IMAGE_URL", imageUrl);
         values.put("STATUS", status);
         values.put("FAVORITE", favorite ? 1 : 0);
         db.insert("SHOW", null, values);
@@ -99,51 +101,78 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (oldVersion < 5) {
             insertShowFull(db, "Breaking Bad", 9.5,
                     "A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine to secure his family's future before he dies.",
-                    "Completed", true);
+                    "Completed", true,
+                    "https://static.tvmaze.com/uploads/images/medium_portrait/501/1253519.jpg");
 
             insertShowFull(db, "Chernobyl", 9.4,
                     "An exploration of one of the worst man-made catastrophes in history and of the brave men and women who sacrificed to save Europe from unimaginable disaster.",
-                    "Completed", true);
+                    "Completed", true,
+                    "https://static.tvmaze.com/uploads/images/medium_portrait/193/482599.jpg");
 
             insertShowFull(db, "Succession", 8.9,
                     "The Roy family controls one of the biggest media and entertainment conglomerates in the world. But the patriarch's grip is faltering, and the whole family is at each other's throats.",
-                    "Completed", true);
+                    "Completed", true,
+                    "https://static.tvmaze.com/uploads/images/medium_portrait/453/1134275.jpg");
 
             insertShowFull(db, "Better Call Saul", 8.9,
                     "The story of small-time attorney Jimmy McGill as he transforms into morally challenged lawyer Saul Goodman, straddling the line between good and evil.",
-                    "Plan to Watch", false);
+                    "Plan to Watch", false,
+                    "https://static.tvmaze.com/uploads/images/medium_portrait/501/1253515.jpg");
 
             insertShowFull(db, "Dark", 8.8,
                     "A family saga with a supernatural twist, set in a German town where the disappearance of two young children exposes the tangled relationships among four families across multiple timelines.",
-                    "Completed", false);
+                    "Completed", false,
+                    "https://static.tvmaze.com/uploads/images/medium_portrait/504/1262352.jpg");
 
             insertShowFull(db, "The Last of Us", 8.8,
                     "Joel, a hardened survivor, is hired to smuggle Ellie out of an oppressive quarantine zone. What starts as a small job soon becomes a brutal, heartbreaking journey across a post-apocalyptic America.",
-                    "Plan to Watch", false);
+                    "Plan to Watch", false,
+                    "https://static.tvmaze.com/uploads/images/medium_portrait/563/1409008.jpg");
 
             insertShowFull(db, "Peaky Blinders", 8.8,
                     "A gangster family epic set in 1919 Birmingham, England, centred on a gang who sew razor blades in the peaks of their caps. Tommy Shelby navigates post-war crime and politics on his ruthless rise to power.",
-                    "Plan to Watch", false);
+                    "Plan to Watch", false,
+                    "https://static.tvmaze.com/uploads/images/medium_portrait/48/122213.jpg");
 
             insertShowFull(db, "Game of Thrones", 9.2,
                     "Nine noble families fight for control over the lands of Westeros, while an ancient enemy returns after being dormant for millennia.",
-                    "Completed", false);
+                    "Completed", false,
+                    "https://static.tvmaze.com/uploads/images/medium_portrait/498/1245274.jpg");
 
             insertShowFull(db, "Stranger Things", 8.7,
                     "When a young boy disappears, his mother, a police chief, and his friends must confront terrifying supernatural forces in order to get him back — and uncover a secret government experiment.",
-                    "Watching", false);
+                    "Watching", false,
+                    "https://static.tvmaze.com/uploads/images/medium_portrait/595/1489169.jpg");
 
             insertShowFull(db, "The Mandalorian", 8.7,
                     "The travels of a lone bounty hunter in the outer reaches of the galaxy, far from the authority of the New Republic, and his unlikely bond with a mysterious alien child.",
-                    "Watching", false);
+                    "Watching", false,
+                    "https://static.tvmaze.com/uploads/images/medium_portrait/501/1253498.jpg");
 
             insertShowFull(db, "Severance", 8.7,
                     "Office workers have their memories surgically divided between their work and personal lives. When a mysterious colleague appears outside of work, it begins a journey to uncover the unsettling truth about their employer.",
-                    "Plan to Watch", false);
+                    "Plan to Watch", false,
+                    "https://static.tvmaze.com/uploads/images/medium_portrait/548/1371406.jpg");
 
             insertShowFull(db, "Squid Game", 8.0,
                     "Hundreds of cash-strapped players accept a strange invitation to compete in children's games. Inside, a tempting prize awaits — but losing means death.",
-                    "Completed", false);
+                    "Completed", false,
+                    "https://static.tvmaze.com/uploads/images/medium_portrait/576/1440521.jpg");
+        }
+
+        if (oldVersion < 6) {
+            db.execSQL("UPDATE SHOW SET IMAGE_URL = 'https://static.tvmaze.com/uploads/images/medium_portrait/501/1253519.jpg' WHERE TITLE = 'Breaking Bad' AND (IMAGE_URL IS NULL OR IMAGE_URL = '');");
+            db.execSQL("UPDATE SHOW SET IMAGE_URL = 'https://static.tvmaze.com/uploads/images/medium_portrait/193/482599.jpg' WHERE TITLE = 'Chernobyl' AND (IMAGE_URL IS NULL OR IMAGE_URL = '');");
+            db.execSQL("UPDATE SHOW SET IMAGE_URL = 'https://static.tvmaze.com/uploads/images/medium_portrait/453/1134275.jpg' WHERE TITLE = 'Succession' AND (IMAGE_URL IS NULL OR IMAGE_URL = '');");
+            db.execSQL("UPDATE SHOW SET IMAGE_URL = 'https://static.tvmaze.com/uploads/images/medium_portrait/501/1253515.jpg' WHERE TITLE = 'Better Call Saul' AND (IMAGE_URL IS NULL OR IMAGE_URL = '');");
+            db.execSQL("UPDATE SHOW SET IMAGE_URL = 'https://static.tvmaze.com/uploads/images/medium_portrait/504/1262352.jpg' WHERE TITLE = 'Dark' AND (IMAGE_URL IS NULL OR IMAGE_URL = '');");
+            db.execSQL("UPDATE SHOW SET IMAGE_URL = 'https://static.tvmaze.com/uploads/images/medium_portrait/563/1409008.jpg' WHERE TITLE = 'The Last of Us' AND (IMAGE_URL IS NULL OR IMAGE_URL = '');");
+            db.execSQL("UPDATE SHOW SET IMAGE_URL = 'https://static.tvmaze.com/uploads/images/medium_portrait/48/122213.jpg' WHERE TITLE = 'Peaky Blinders' AND (IMAGE_URL IS NULL OR IMAGE_URL = '');");
+            db.execSQL("UPDATE SHOW SET IMAGE_URL = 'https://static.tvmaze.com/uploads/images/medium_portrait/498/1245274.jpg' WHERE TITLE = 'Game of Thrones' AND (IMAGE_URL IS NULL OR IMAGE_URL = '');");
+            db.execSQL("UPDATE SHOW SET IMAGE_URL = 'https://static.tvmaze.com/uploads/images/medium_portrait/595/1489169.jpg' WHERE TITLE = 'Stranger Things' AND (IMAGE_URL IS NULL OR IMAGE_URL = '');");
+            db.execSQL("UPDATE SHOW SET IMAGE_URL = 'https://static.tvmaze.com/uploads/images/medium_portrait/501/1253498.jpg' WHERE TITLE = 'The Mandalorian' AND (IMAGE_URL IS NULL OR IMAGE_URL = '');");
+            db.execSQL("UPDATE SHOW SET IMAGE_URL = 'https://static.tvmaze.com/uploads/images/medium_portrait/548/1371406.jpg' WHERE TITLE = 'Severance' AND (IMAGE_URL IS NULL OR IMAGE_URL = '');");
+            db.execSQL("UPDATE SHOW SET IMAGE_URL = 'https://static.tvmaze.com/uploads/images/medium_portrait/576/1440521.jpg' WHERE TITLE = 'Squid Game' AND (IMAGE_URL IS NULL OR IMAGE_URL = '');");
         }
     }
 }
