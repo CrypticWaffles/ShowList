@@ -30,6 +30,9 @@ Queued is an Android app for tracking TV shows. Search for shows directly from T
 
 ## Getting Started
 
+### Demo
+[https://appetize.io/app/b_6pdork34eiaei2tu6cignrfbgi](https://appetize.io/embed/b_6pdork34eiaei2tu6cignrfbgi)
+
 ### Prerequisites
 
 - Android Studio
